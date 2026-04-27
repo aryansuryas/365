@@ -1,2 +1,2 @@
 # 365
-thsis the daily 365 day project
+thsis the daily 365 day project of The Complewt
