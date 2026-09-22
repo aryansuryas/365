@@ -5,15 +5,7 @@ import QRCode from 'qrcode/lib/browser'
 import JSZip from 'jszip'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  QrCode,
-  Loader2,
-  Palette,
-  FileText,
-  FileImage,
-  Archive,
-  Download,
-} from 'lucide-react'
+import { QrCode, Loader2, FileImage, FileText, Archive } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -26,22 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { fadeUp, stagger } from '@/lib/motion'
 
 async function makeDataUrl(text, opts) {
   return new Promise((resolve, reject) => {
     QRCode.toDataURL(
       text,
-      {
-        errorCorrectionLevel: opts.ecl,
-        margin: 2,
-        width: 512,
-        color: { dark: opts.fg, light: opts.bg },
-      },
-      (err, url) => {
-        if (err) reject(err)
-        else resolve(url)
-      }
+      { errorCorrectionLevel: opts.ecl, margin: 2, width: 512, color: { dark: opts.fg, light: opts.bg } },
+      (err, url) => { if (err) reject(err); else resolve(url) }
     )
   })
 }
@@ -50,16 +33,8 @@ async function makeSvg(text, opts) {
   return new Promise((resolve, reject) => {
     QRCode.toString(
       text,
-      {
-        type: 'svg',
-        errorCorrectionLevel: opts.ecl,
-        margin: 2,
-        color: { dark: opts.fg, light: opts.bg },
-      },
-      (err, str) => {
-        if (err) reject(err)
-        else resolve(str)
-      }
+      { type: 'svg', errorCorrectionLevel: opts.ecl, margin: 2, color: { dark: opts.fg, light: opts.bg } },
+      (err, str) => { if (err) reject(err); else resolve(str) }
     )
   })
 }
@@ -67,11 +42,8 @@ async function makeSvg(text, opts) {
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url
-  a.download = name
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
+  a.href = url; a.download = name
+  document.body.appendChild(a); a.click(); a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
 
@@ -98,8 +70,8 @@ const PALETTES = [
 
 export function QrGeneratorClient() {
   const [mode, setMode] = useState('single')
-  const [text, setText] = useState('https://converthub.local')
-  const [batchText, setBatchText] = useState('https://vercel.com\nhttps://linear.app\nhttps://notion.so')
+  const [text, setText] = useState('')
+  const [batchText, setBatchText] = useState('')
   const [fg, setFg] = useState(PALETTES[0].fg)
   const [bg, setBg] = useState(PALETTES[0].bg)
   const [ecl, setEcl] = useState('M')
@@ -107,38 +79,25 @@ export function QrGeneratorClient() {
   const [busy, setBusy] = useState(false)
 
   const currentText = mode === 'single' ? text : batchText.split('\n').find((l) => l.trim()) || ''
+  const batchLines = useMemo(() => batchText.split('\n').map((l) => l.trim()).filter(Boolean), [batchText])
 
   useEffect(() => {
-    if (!currentText) {
-      setPreview('')
-      return
-    }
+    if (!currentText) { setPreview(''); return }
     let cancelled = false
     makeDataUrl(currentText, { fg, bg, ecl })
-      .then((url) => {
-        if (!cancelled) setPreview(url)
-      })
+      .then((url) => { if (!cancelled) setPreview(url) })
       .catch(() => {})
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [currentText, fg, bg, ecl])
-
-  const batchLines = useMemo(() => batchText.split('\n').map((l) => l.trim()).filter(Boolean), [batchText])
 
   const downloadPng = async () => {
     if (!currentText) return
     setBusy(true)
     try {
       const url = await makeDataUrl(currentText, { fg, bg, ecl })
-      const blob = dataUrlToBlob(url)
-      downloadBlob(blob, `qr-${Date.now()}.png`)
+      downloadBlob(dataUrlToBlob(url), `qr-${Date.now()}.png`)
       toast.success('PNG saved')
-    } catch (e) {
-      toast.error('Could not generate PNG')
-    } finally {
-      setBusy(false)
-    }
+    } catch { toast.error('Could not generate PNG') } finally { setBusy(false) }
   }
 
   const downloadSvg = async () => {
@@ -146,21 +105,13 @@ export function QrGeneratorClient() {
     setBusy(true)
     try {
       const svg = await makeSvg(currentText, { fg, bg, ecl })
-      const blob = new Blob([svg], { type: 'image/svg+xml' })
-      downloadBlob(blob, `qr-${Date.now()}.svg`)
+      downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), `qr-${Date.now()}.svg`)
       toast.success('SVG saved')
-    } catch (e) {
-      toast.error('Could not generate SVG')
-    } finally {
-      setBusy(false)
-    }
+    } catch { toast.error('Could not generate SVG') } finally { setBusy(false) }
   }
 
   const downloadBatch = async (format) => {
-    if (batchLines.length === 0) {
-      toast.error('Add some lines first')
-      return
-    }
+    if (batchLines.length === 0) { toast.error('Add some lines first'); return }
     setBusy(true)
     try {
       const zip = new JSZip()
@@ -169,212 +120,150 @@ export function QrGeneratorClient() {
         const name = slug(line, i)
         if (format === 'png') {
           const url = await makeDataUrl(line, { fg, bg, ecl })
-          const blob = dataUrlToBlob(url)
-          zip.file(`${name}.png`, blob)
+          zip.file(`${name}.png`, dataUrlToBlob(url))
         } else {
-          const svg = await makeSvg(line, { fg, bg, ecl })
-          zip.file(`${name}.svg`, svg)
+          zip.file(`${name}.svg`, await makeSvg(line, { fg, bg, ecl }))
         }
       }
-      const csv =
-        'index,value,filename\n' +
-        batchLines.map((l, i) => `${i + 1},"${l.replace(/"/g, '""')}",${slug(l, i)}.${format}`).join('\n')
-      zip.file('index.csv', csv)
-
       const blob = await zip.generateAsync({ type: 'blob' })
       downloadBlob(blob, `qr-batch-${Date.now()}.zip`)
       toast.success(`Zipped ${batchLines.length} QR codes`)
     } catch (e) {
-      console.error(e)
-      toast.error('Batch failed')
-    } finally {
-      setBusy(false)
-    }
+      console.error(e); toast.error('Batch failed')
+    } finally { setBusy(false) }
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12 pb-28 lg:pb-12">
-      <motion.div initial="hidden" animate="show" variants={stagger(0.03, 0.08)} className="mb-10">
-        <motion.h1 variants={fadeUp} className="font-serif-display text-4xl sm:text-5xl">
-          QR Generator
-        </motion.h1>
-        <motion.p variants={fadeUp} className="mt-3 max-w-2xl text-muted-foreground">
-          A single link, or a whole list — preview lives, download as PNG, SVG, or a zip.
-        </motion.p>
+    <main className="mx-auto max-w-2xl px-6 py-10">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="mb-8">
+        <h1 className="font-serif-display text-3xl sm:text-4xl">QR Generator</h1>
       </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-6">
-          <Tabs value={mode} onValueChange={setMode}>
-            <TabsList className="h-10 rounded-full bg-card p-1">
-              <TabsTrigger value="single" className="rounded-full px-5">
-                Single
-              </TabsTrigger>
-              <TabsTrigger value="batch" className="rounded-full px-5">
-                Batch
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="single" className="mt-6">
-              <div className="rounded-2xl border border-border bg-card p-5 paper-edge">
-                <Label className="mb-2 block text-sm">Text or URL</Label>
-                <Textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="https://example.com"
-                  className="min-h-[120px] resize-none"
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.05 }} className="space-y-4">
+        {/* Preview */}
+        <div className="flex justify-center">
+          <div className="relative flex h-52 w-52 items-center justify-center overflow-hidden rounded-2xl border border-border bg-card">
+            <AnimatePresence mode="wait">
+              {preview ? (
+                <motion.img
+                  key={preview}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  src={preview}
+                  alt="QR preview"
+                  className="h-full w-full object-contain p-3"
                 />
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={downloadPng} disabled={busy || !text}>
-                    {busy ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <FileImage className="mr-2 h-3.5 w-3.5" />}
-                    PNG
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={downloadSvg} disabled={busy || !text}>
-                    <FileText className="mr-2 h-3.5 w-3.5" />
-                    SVG
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="batch" className="mt-6">
-              <div className="rounded-2xl border border-border bg-card p-5 paper-edge">
-                <div className="mb-2 flex items-center justify-between">
-                  <Label className="text-sm">One URL or line of text per row</Label>
-                  <span className="text-xs text-muted-foreground">{batchLines.length} entries</span>
-                </div>
-                <Textarea
-                  value={batchText}
-                  onChange={(e) => setBatchText(e.target.value)}
-                  placeholder={'https://example.com\nhello world\nhttps://another.link'}
-                  className="min-h-[200px] resize-none font-mono text-sm"
-                />
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Button size="sm" onClick={() => downloadBatch('png')} disabled={busy || batchLines.length === 0}>
-                    {busy ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Archive className="mr-2 h-3.5 w-3.5" />}
-                    Download PNG zip
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => downloadBatch('svg')} disabled={busy || batchLines.length === 0}>
-                    <Archive className="mr-2 h-3.5 w-3.5" />
-                    Download SVG zip
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+              ) : (
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <QrCode className="h-14 w-14 text-muted-foreground/20" strokeWidth={1} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
-        <aside className="space-y-6">
-          <div className="rounded-2xl border border-border bg-card p-5 paper-edge">
-            <h3 className="font-serif-display text-lg">Preview</h3>
-            <div className="relative mt-4 flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-border bg-background">
-              <AnimatePresence mode="wait">
-                {preview ? (
-                  <motion.img
-                    key={preview}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    src={preview}
-                    alt="QR preview"
-                    className="h-full w-full object-contain p-4"
-                  />
-                ) : (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <QrCode className="h-16 w-16 text-muted-foreground/30" strokeWidth={1} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <p className="mt-3 truncate text-center text-xs text-muted-foreground">
-              {currentText || 'Preview will appear here'}
-            </p>
-          </div>
+        {/* Tabs */}
+        <Tabs value={mode} onValueChange={setMode}>
+          <TabsList className="h-9 w-full rounded-xl bg-muted p-1">
+            <TabsTrigger value="single" className="flex-1 rounded-lg text-sm">Single</TabsTrigger>
+            <TabsTrigger value="batch" className="flex-1 rounded-lg text-sm">Batch</TabsTrigger>
+          </TabsList>
 
-          <div className="rounded-2xl border border-border bg-card p-5 paper-edge">
-            <div className="mb-4 flex items-center gap-2">
-              <Palette className="h-4 w-4 text-muted-foreground" />
-              <h3 className="font-serif-display text-lg">Style</h3>
+          <TabsContent value="single" className="mt-3">
+            <Textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="https://example.com or any text"
+              className="min-h-[96px] resize-none rounded-xl text-sm"
+            />
+            <div className="mt-2 flex gap-2">
+              <Button size="sm" onClick={downloadPng} disabled={busy || !text} className="flex-1">
+                {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <FileImage className="mr-1.5 h-3.5 w-3.5" />}
+                PNG
+              </Button>
+              <Button size="sm" variant="outline" onClick={downloadSvg} disabled={busy || !text} className="flex-1">
+                <FileText className="mr-1.5 h-3.5 w-3.5" />
+                SVG
+              </Button>
             </div>
-            <div className="space-y-4">
-              <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">Foreground</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={fg}
-                    onChange={(e) => setFg(e.target.value)}
-                    className="h-9 w-12 cursor-pointer rounded border border-border bg-transparent"
-                  />
-                  <Input value={fg} onChange={(e) => setFg(e.target.value)} className="h-9" />
-                </div>
+          </TabsContent>
+
+          <TabsContent value="batch" className="mt-3">
+            <div className="mb-1.5 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">One URL per line</span>
+              <span className="text-xs text-muted-foreground">{batchLines.length} entries</span>
+            </div>
+            <Textarea
+              value={batchText}
+              onChange={(e) => setBatchText(e.target.value)}
+              placeholder={'https://example.com\nhello world'}
+              className="min-h-[140px] resize-none font-mono text-sm rounded-xl"
+            />
+            <div className="mt-2 flex gap-2">
+              <Button size="sm" onClick={() => downloadBatch('png')} disabled={busy || batchLines.length === 0} className="flex-1">
+                {busy ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Archive className="mr-1.5 h-3.5 w-3.5" />}
+                PNG zip
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadBatch('svg')} disabled={busy || batchLines.length === 0} className="flex-1">
+                <Archive className="mr-1.5 h-3.5 w-3.5" />
+                SVG zip
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Style */}
+        <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Style</p>
+          <div className="flex flex-wrap gap-2">
+            {PALETTES.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => { setFg(p.fg); setBg(p.bg) }}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
+                  fg === p.fg && bg === p.bg ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <span className="flex h-3 w-3 overflow-hidden rounded-full border border-border">
+                  <span style={{ background: p.fg }} className="h-full w-1/2" />
+                  <span style={{ background: p.bg }} className="h-full w-1/2" />
+                </span>
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="mb-1 block text-xs text-muted-foreground">Foreground</Label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
+                <Input value={fg} onChange={(e) => setFg(e.target.value)} className="h-8 text-xs" />
               </div>
-              <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">Background</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={bg}
-                    onChange={(e) => setBg(e.target.value)}
-                    className="h-9 w-12 cursor-pointer rounded border border-border bg-transparent"
-                  />
-                  <Input value={bg} onChange={(e) => setBg(e.target.value)} className="h-9" />
-                </div>
-              </div>
-              <div>
-                <Label className="mb-1.5 block text-xs text-muted-foreground">Error correction</Label>
-                <Select value={ecl} onValueChange={setEcl}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="L">Low — ~7%</SelectItem>
-                    <SelectItem value="M">Medium — ~15%</SelectItem>
-                    <SelectItem value="Q">Quartile — ~25%</SelectItem>
-                    <SelectItem value="H">High — ~30%</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {PALETTES.map((p) => (
-                  <button
-                    key={p.label}
-                    onClick={() => {
-                      setFg(p.fg)
-                      setBg(p.bg)
-                    }}
-                    className="flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-xs transition hover:border-primary"
-                  >
-                    <span className="flex h-3 w-3 overflow-hidden rounded-full border border-border">
-                      <span style={{ background: p.fg }} className="h-full w-1/2" />
-                      <span style={{ background: p.bg }} className="h-full w-1/2" />
-                    </span>
-                    {p.label}
-                  </button>
-                ))}
+            </div>
+            <div>
+              <Label className="mb-1 block text-xs text-muted-foreground">Background</Label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-border bg-transparent" />
+                <Input value={bg} onChange={(e) => setBg(e.target.value)} className="h-8 text-xs" />
               </div>
             </div>
           </div>
-        </aside>
-      </div>
-
-      {/* Sticky mobile CTA — mirrors whichever action matches the active tab */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 backdrop-blur-md lg:hidden">
-        <Button
-          onClick={mode === 'single' ? downloadPng : () => downloadBatch('png')}
-          disabled={busy || (mode === 'single' ? !text : batchLines.length === 0)}
-          size="lg"
-          className="h-11 w-full rounded-full"
-        >
-          {busy ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="mr-2 h-4 w-4" />
-          )}
-          {mode === 'single' ? 'Download PNG' : `Download ${batchLines.length} as zip`}
-        </Button>
-      </div>
+          <div>
+            <Label className="mb-1 block text-xs text-muted-foreground">Error correction</Label>
+            <Select value={ecl} onValueChange={setEcl}>
+              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="L">Low (~7%)</SelectItem>
+                <SelectItem value="M">Medium (~15%)</SelectItem>
+                <SelectItem value="Q">Quartile (~25%)</SelectItem>
+                <SelectItem value="H">High (~30%)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </motion.div>
     </main>
   )
 }

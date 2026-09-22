@@ -1,13 +1,6 @@
 import './globals.css'
 import { Providers } from './providers'
-import { Inter } from 'next/font/google'
 import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/lib/site'
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-})
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,11 +25,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{__html:'window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);'}} />
       </head>
-      <body className="font-sans antialiased">
+      <body className="antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

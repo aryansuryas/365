@@ -8,17 +8,6 @@ const nextConfig = {
       { protocol: 'https', hostname: 'avatars.githubusercontent.com', pathname: '/**' },
     ],
   },
-  webpack(config, { dev }) {
-    if (dev) {
-      // Reduce CPU/memory from file watching
-      config.watchOptions = {
-        poll: 1000,          // faster change detection
-        aggregateTimeout: 200,
-        ignored: ['**/node_modules', '**/.next'],
-      };
-    }
-    return config;
-  },
   // Keep more compiled pages in memory — avoids recompiling warm routes
   onDemandEntries: {
     maxInactiveAge: 60 * 1000,  // 60s

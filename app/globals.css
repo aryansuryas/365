@@ -1,95 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Plain white surface, neutral gray text/borders. The only real
-       colour in the system is --primary (wax-seal oxblood), reserved
-       for buttons, links, and highlights so it stays meaningful. */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --background: 0 0% 99%;
+    --foreground: 0 0% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 0 0% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 352 48% 30%;
+    --popover-foreground: 0 0% 8%;
+    --primary: 352 52% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 95%;
+    --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 12%;
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 42%;
-    --accent: 0 0% 94%;
+    --muted-foreground: 0 0% 46%;
+    --accent: 0 0% 93%;
     --accent-foreground: 0 0% 12%;
     --destructive: 6 62% 42%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 89%;
-    --input: 0 0% 89%;
-    --ring: 352 48% 30%;
-    --chart-1: 352 48% 40%;
-    --chart-2: 173 35% 35%;
-    --chart-3: 38 45% 50%;
-    --chart-4: 220 25% 42%;
-    --chart-5: 280 22% 48%;
-    --radius: 0.625rem;
-    --sidebar-background: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 352 52% 32%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 99%;
     --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 352 48% 30%;
+    --sidebar-primary: 352 52% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent: 0 0% 96%;
     --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 89%;
-    --sidebar-ring: 352 48% 30%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 352 52% 32%;
   }
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 94%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 94%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 94%;
-    --primary: 352 55% 54%;
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 352 58% 56%;
     --primary-foreground: 0 0% 8%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 94%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 62%;
-    --accent: 0 0% 17%;
-    --accent-foreground: 0 0% 94%;
-    --destructive: 6 60% 48%;
-    --destructive-foreground: 0 0% 94%;
-    --border: 0 0% 19%;
-    --input: 0 0% 19%;
-    --ring: 352 55% 54%;
-    --chart-1: 352 55% 58%;
-    --chart-2: 173 45% 55%;
-    --chart-3: 38 55% 62%;
-    --chart-4: 220 45% 65%;
-    --chart-5: 280 40% 68%;
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 94%;
-    --sidebar-primary: 352 55% 54%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 58%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 6 60% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 17%;
+    --input: 0 0% 17%;
+    --ring: 352 58% 56%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 352 58% 56%;
     --sidebar-primary-foreground: 0 0% 8%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 94%;
-    --sidebar-border: 0 0% 19%;
-    --sidebar-ring: 352 55% 54%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 17%;
+    --sidebar-ring: 352 58% 56%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  /* Bold, tight-tracked sans for headings — no serif, nothing decorative. */
   .font-serif-display {
-    font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
   }
   :focus-visible {
     outline: 2px solid hsl(var(--primary) / 0.5);
@@ -98,22 +85,28 @@
 }
 
 @layer utilities {
-  .paper-edge {
-    box-shadow: 0 1px 0 hsl(var(--border));
+  .drop-zone {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .drop-zone:hover {
+    border-color: hsl(var(--primary) / 0.5);
+    background-color: hsl(var(--card));
+  }
+  .drop-zone-active {
+    border-color: hsl(var(--primary) / 0.7) !important;
+    background-color: hsl(var(--primary) / 0.04) !important;
   }
   .card-hover {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .card-hover:hover {
-    transform: translateY(-2px);
-    border-color: hsl(var(--primary) / 0.35);
+    transform: translateY(-3px);
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 8px 24px hsl(var(--primary) / 0.08);
   }
 }
 
-/* Applied briefly to <html> when the theme toggles, so the color swap
-   fades instead of snapping. Removed right after so it never slows
-   down ordinary hover/focus transitions elsewhere. */
 .theme-transition,
 .theme-transition * {
-  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease, fill 0.4s ease, stroke 0.4s ease !important;
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease !important;
 }

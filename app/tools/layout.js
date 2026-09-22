@@ -3,8 +3,11 @@
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SiteHeader } from '@/components/site/header'
-import { SiteFooter } from '@/components/site/footer'
-import { fadeIn } from '@/lib/motion'
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+}
 
 export default function ToolsLayout({ children }) {
   const pathname = usePathname()
@@ -16,7 +19,6 @@ export default function ToolsLayout({ children }) {
           {children}
         </motion.div>
       </AnimatePresence>
-      <SiteFooter />
     </div>
   )
 }
